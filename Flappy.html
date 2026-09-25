@@ -1,481 +1,453 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-
     <title>Flappy Bean</title>
 
     <style>
-
-        /* ------------------------------
-           PAGE
-        ------------------------------ */
-
         body {
             margin: 0;
             background: skyblue;
-
             display: flex;
             justify-content: center;
             align-items: center;
-
             height: 100vh;
-
             font-family: Arial, sans-serif;
         }
-
-
-        /* ------------------------------
-           GAME CONTAINER
-        ------------------------------ */
 
         .game-container {
             position: relative;
         }
 
-
-        /* ------------------------------
-           GAME CANVAS
-        ------------------------------ */
-
         canvas {
             display: block;
-
             border: 4px solid black;
-
             background: skyblue;
         }
 
-
-        /* ------------------------------
-           GAME OVER BOX
-        ------------------------------ */
-
         #gameOver {
-
             position: absolute;
-
             top: 50%;
             left: 50%;
-
             transform: translate(-50%, -50%);
-
             text-align: center;
-
             background: white;
-
             padding: 25px;
-
             border-radius: 15px;
-
             display: none;
         }
 
-
-        /* ------------------------------
-           RESTART BUTTON
-        ------------------------------ */
-
         button {
-
             padding: 10px 20px;
-
             font-size: 18px;
-
             border: none;
-
             border-radius: 8px;
-
             cursor: pointer;
         }
-
     </style>
-
 </head>
-
 
 <body>
 
+<div class="game-container">
 
-    <!-- ==============================
-         GAME
-    =============================== -->
+    <canvas id="game" width="400" height="600"></canvas>
 
-    <div class="game-container">
-
-        <canvas id="game" width="400" height="600"></canvas>
-
-
-        <!-- GAME OVER SCREEN -->
-
-        <div id="gameOver">
-
-            <h1>Game Over!</h1>
-
-            <p>
-                Score:
-                <span id="finalScore">0</span>
-            </p>
-
-            <p>
-                High Score:
-                <span id="finalHighScore">0</span>
-            </p>
-
-            <button onclick="restartGame()">
-                Play Again
-            </button>
-
-        </div>
-
+    <div id="gameOver">
+        <h1>Game Over!</h1>
+        <p>Score: <span id="finalScore">0</span></p>
+        <p>High Score: <span id="finalHighScore">0</span></p>
+        <button onclick="restartGame()">Play Again</button>
     </div>
 
+</div>
 
+<script>
 
-    <!-- ==============================
-         JAVASCRIPT
-    =============================== -->
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-    <script>
 
+// =========================
+// BEAN IMAGE
+// =========================
 
-        /* ------------------------------
-           SET UP THE GAME
-        ------------------------------ */
+const beanLogo = new Image();
+beanLogo.src = "images/navbarLogo.jpeg";
 
-        const canvas = document.getElementById("game");
 
-        const ctx = canvas.getContext("2d");
+// =========================
+// GAME VARIABLES
+// =========================
 
+let highScore =
+    Number(localStorage.getItem("flappyBeanHighScore")) || 0;
 
-        /* ------------------------------
-           LOAD THE BEAN LOGO
-        ------------------------------ */
+let bird;
+let pipes;
+let cannonballs;
+let score;
+let gameRunning;
 
-        const beanLogo = new Image();
 
-        beanLogo.src = "images/navbarLogo.jpeg";
+// =========================
+// GAME SETTINGS
+// =========================
 
+const gravity = 0.5;
+const jumpStrength = -8;
 
-        /*
-        If navbarLogo.jpeg isn't the picture
-        you want, change it to:
+const pipeWidth = 60;
+const pipeGap = 160;
+const pipeSpeed = 2.5;
 
-        beanLogo.src = "images/logo.jpeg";
-        */
 
+// =========================
+// CANNON SETTINGS
+// =========================
 
+const cannonballSpeed = 4;
+const cannonballRadius = 7;
 
-        /* ------------------------------
-           HIGH SCORE
-        ------------------------------ */
 
-        let highScore =
-            Number(localStorage.getItem("flappyBeanHighScore")) || 0;
+// =========================
+// START GAME
+// =========================
 
+function startGame() {
 
+    bird = {
+        x: 80,
+        y: 300,
+        width: 35,
+        height: 35,
+        velocity: 0
+    };
 
-        /* ------------------------------
-           GAME VARIABLES
-        ------------------------------ */
+    pipes = [];
 
-        let bird;
+    cannonballs = [];
 
-        let pipes;
+    score = 0;
 
-        let score;
+    gameRunning = true;
 
-        let gameRunning;
+    document.getElementById("gameOver").style.display = "none";
 
+    addPipe();
 
+    gameLoop();
+}
 
-        /* ------------------------------
-           GAME SETTINGS
-        ------------------------------ */
 
-        const gravity = 0.5;
+// =========================
+// ADD PIPE
+// =========================
 
-        const jumpStrength = -8;
+function addPipe() {
 
-        const pipeWidth = 60;
+    const gapY =
+        Math.floor(
+            Math.random() *
+            (canvas.height - pipeGap - 100)
+        ) + 50;
 
-        const pipeGap = 160;
+    pipes.push({
 
-        const pipeSpeed = 2.5;
+        x: canvas.width,
 
+        topHeight: gapY,
 
+        passed: false,
 
-        /* ------------------------------
-           START GAME
-        ------------------------------ */
+        fired: false
+    });
+}
 
-        function startGame() {
 
-            bird = {
+// =========================
+// FIRE CANNON
+// =========================
 
-                x: 80,
+function fireCannon(pipe) {
 
-                y: 300,
+    // Cannons don't work until 15 points
 
-                width: 35,
+    if (score < 15) {
+        return;
+    }
 
-                height: 35,
 
-                velocity: 0
+    // Top ship cannonball
 
-            };
+    cannonballs.push({
 
+        x: pipe.x + pipeWidth + 15,
 
-            pipes = [];
+        y: pipe.topHeight,
 
-            score = 0;
+        velocityX: -cannonballSpeed,
 
-            gameRunning = true;
+        velocityY: 2
+    });
 
 
-            document.getElementById("gameOver").style.display = "none";
+    // Bottom ship cannonball
 
+    cannonballs.push({
 
-            addPipe();
+        x: pipe.x + pipeWidth + 15,
 
-            gameLoop();
+        y: pipe.topHeight + pipeGap,
 
-        }
+        velocityX: -cannonballSpeed,
 
+        velocityY: -2
+    });
+}
 
 
-        /* ------------------------------
-           CREATE A PIPE
-        ------------------------------ */
+// =========================
+// FLAP
+// =========================
 
-        function addPipe() {
+function flap() {
 
-            const gapY =
-                Math.floor(
-                    Math.random() *
-                    (canvas.height - pipeGap - 100)
-                ) + 50;
+    if (gameRunning) {
 
+        bird.velocity = jumpStrength;
+    }
+}
 
-            pipes.push({
 
-                x: canvas.width,
+// =========================
+// CONTROLS
+// =========================
 
-                topHeight: gapY,
+document.addEventListener("keydown", function(event) {
 
-                passed: false
+    if (event.code === "Space") {
 
-            });
+        event.preventDefault();
 
-        }
+        flap();
+    }
+});
 
 
+canvas.addEventListener("click", function() {
 
-        /* ------------------------------
-           MAKE BEAN JUMP
-        ------------------------------ */
+    flap();
+});
 
-        function flap() {
 
-            if (gameRunning) {
+// =========================
+// DRAW BEAN
+// =========================
 
-                bird.velocity = jumpStrength;
+function drawBird() {
 
-            }
+    ctx.save();
 
-        }
 
+    ctx.translate(
 
+        bird.x + bird.width / 2,
 
-        /* ------------------------------
-           SPACEBAR CONTROL
-        ------------------------------ */
+        bird.y + bird.height / 2
+    );
 
-        document.addEventListener("keydown", function(event) {
 
-            if (event.code === "Space") {
+    // Rotate bean depending on movement
 
-                event.preventDefault();
+    let rotation = bird.velocity * 0.05;
 
-                flap();
 
-            }
+    rotation = Math.max(
 
-        });
+        -0.5,
 
+        Math.min(rotation, 1.2)
+    );
 
 
-        /* ------------------------------
-           MOUSE CONTROL
-        ------------------------------ */
+    ctx.rotate(rotation);
 
-        canvas.addEventListener("click", function() {
 
-            flap();
+    // Draw bean
 
-        });
+    ctx.drawImage(
 
+        beanLogo,
 
+        -bird.width / 2,
 
-        /* ------------------------------
-           DRAW THE BEAN
-        ------------------------------ */
+        -bird.height / 2,
 
-        function drawBird() {
+        bird.width,
 
+        bird.height
+    );
 
-            /*
-            Save the canvas before rotating.
-            */
 
-            ctx.save();
+    // =========================
+    // PIRATE HAT
+    // =========================
 
+    if (score >= 10) {
 
-            /*
-            Move the canvas to the
-            center of the bean.
-            */
+        ctx.fillStyle = "black";
 
-            ctx.translate(
 
-                bird.x + bird.width / 2,
+        // Hat
 
-                bird.y + bird.height / 2
+        ctx.beginPath();
 
-            );
+        ctx.moveTo(-18, -14);
 
+        ctx.lineTo(18, -14);
 
-            /*
-            Calculate rotation.
+        ctx.lineTo(12, -25);
 
-            When the bean is going up,
-            it tilts upward.
+        ctx.lineTo(-12, -25);
 
-            When the bean is falling,
-            it tilts downward.
-            */
+        ctx.closePath();
 
-            let rotation = bird.velocity * 0.05;
+        ctx.fill();
 
 
-            /*
-            Prevent it from rotating
-            too far.
-            */
+        // Hat brim
 
-            rotation = Math.max(
-                -0.5,
-                Math.min(rotation, 1.2)
-            );
+        ctx.fillRect(
 
+            -21,
 
-            ctx.rotate(rotation);
+            -16,
 
+            42,
 
-            /*
-            Draw the bean logo.
-            */
+            5
+        );
 
-            ctx.drawImage(
 
-                beanLogo,
+        // Skull
 
-                -bird.width / 2,
+        ctx.fillStyle = "white";
 
-                -bird.height / 2,
+        ctx.font = "12px Arial";
 
-                bird.width,
+        ctx.textAlign = "center";
 
-                bird.height
+        ctx.fillText(
 
-            );
+            "☠",
 
+            0,
 
-            /*
-            Restore the canvas.
-            */
+            -17
+        );
+    }
 
-            ctx.restore();
 
-        }
+    ctx.restore();
+}
 
 
+// =========================
+// DRAW PIPES / PIRATE SHIPS
+// =========================
 
-        /* ------------------------------
-           DRAW PIPES
-        ------------------------------ */
+function drawPipes() {
 
-       function drawPipes() {
 
-    // Before 10 points = normal pipes
+    // =========================
+    // NORMAL PIPES
+    // =========================
+
     if (score < 10) {
 
         ctx.fillStyle = "green";
 
+
         pipes.forEach(function(pipe) {
 
+
             // Top pipe
+
             ctx.fillRect(
+
                 pipe.x,
+
                 0,
+
                 pipeWidth,
+
                 pipe.topHeight
             );
 
+
             // Bottom pipe
+
             ctx.fillRect(
+
                 pipe.x,
+
                 pipe.topHeight + pipeGap,
+
                 pipeWidth,
+
                 canvas.height
             );
 
         });
+
 
         return;
     }
 
 
-    // =================================
-    // PIRATE MODE
-    // =================================
+    // =========================
+    // PIRATE SHIPS
+    // =========================
 
     pipes.forEach(function(pipe) {
 
-        // -----------------------------
+
+        // =================================
         // TOP PIRATE SHIP
-        // -----------------------------
-
-        ctx.fillStyle = "#5c3317";
-
-        ctx.fillRect(
-            pipe.x - 10,
-            pipe.topHeight - 25,
-            pipeWidth + 20,
-            25
-        );
+        // =================================
 
 
-        // Ship hull
+        // Hull
+
+        ctx.fillStyle = "#6b3e1e";
+
         ctx.beginPath();
 
         ctx.moveTo(
-            pipe.x - 15,
-            pipe.topHeight
+
+            pipe.x - 20,
+
+            pipe.topHeight - 10
         );
 
         ctx.lineTo(
-            pipe.x + pipeWidth + 15,
-            pipe.topHeight
+
+            pipe.x + pipeWidth + 20,
+
+            pipe.topHeight - 10
         );
 
         ctx.lineTo(
+
             pipe.x + pipeWidth,
+
             pipe.topHeight + 20
         );
 
         ctx.lineTo(
+
             pipe.x,
+
             pipe.topHeight + 20
         );
 
@@ -484,59 +456,154 @@
         ctx.fill();
 
 
-        // -----------------------------
-        // TOP CANNON
-        // -----------------------------
+        // Deck
 
-        ctx.fillStyle = "black";
+        ctx.fillStyle = "#8b5a2b";
+
+        ctx.fillRect(
+
+            pipe.x - 10,
+
+            pipe.topHeight - 18,
+
+            pipeWidth + 20,
+
+            8
+        );
+
+
+        // Mast
+
+        ctx.fillStyle = "#4a2a12";
+
+        ctx.fillRect(
+
+            pipe.x + pipeWidth / 2 - 3,
+
+            pipe.topHeight - 75,
+
+            6,
+
+            60
+        );
+
+
+        // Sail
+
+        ctx.fillStyle = "#f5f0d8";
 
         ctx.beginPath();
 
-        ctx.arc(
-            pipe.x + pipeWidth / 2,
-            pipe.topHeight - 8,
-            8,
-            0,
-            Math.PI * 2
+        ctx.moveTo(
+
+            pipe.x + pipeWidth / 2 + 3,
+
+            pipe.topHeight - 70
         );
+
+        ctx.lineTo(
+
+            pipe.x + pipeWidth / 2 + 35,
+
+            pipe.topHeight - 35
+        );
+
+        ctx.lineTo(
+
+            pipe.x + pipeWidth / 2 + 3,
+
+            pipe.topHeight - 35
+        );
+
+        ctx.closePath();
 
         ctx.fill();
 
 
-        // -----------------------------
+        // Pirate flag
+
+        ctx.fillStyle = "black";
+
+        ctx.fillRect(
+
+            pipe.x + pipeWidth / 2 - 2,
+
+            pipe.topHeight - 88,
+
+            35,
+
+            20
+        );
+
+
+        ctx.fillStyle = "white";
+
+        ctx.font = "14px Arial";
+
+        ctx.textAlign = "center";
+
+        ctx.fillText(
+
+            "☠",
+
+            pipe.x + pipeWidth / 2 + 15,
+
+            pipe.topHeight - 73
+        );
+
+
+        // Top cannon
+
+        ctx.fillStyle = "black";
+
+        ctx.fillRect(
+
+            pipe.x + pipeWidth - 5,
+
+            pipe.topHeight - 5,
+
+            25,
+
+            8
+        );
+
+
+        // =================================
         // BOTTOM PIRATE SHIP
-        // -----------------------------
-
-        ctx.fillStyle = "#5c3317";
-
-        ctx.fillRect(
-            pipe.x - 10,
-            pipe.topHeight + pipeGap,
-            pipeWidth + 20,
-            25
-        );
+        // =================================
 
 
-        // Bottom ship hull
+        // Hull
+
+        ctx.fillStyle = "#6b3e1e";
+
         ctx.beginPath();
 
         ctx.moveTo(
-            pipe.x - 15,
-            pipe.topHeight + pipeGap
+
+            pipe.x - 20,
+
+            pipe.topHeight + pipeGap + 10
         );
 
         ctx.lineTo(
-            pipe.x + pipeWidth + 15,
-            pipe.topHeight + pipeGap
+
+            pipe.x + pipeWidth + 20,
+
+            pipe.topHeight + pipeGap + 10
         );
 
         ctx.lineTo(
+
             pipe.x + pipeWidth,
+
             pipe.topHeight + pipeGap - 20
         );
 
         ctx.lineTo(
+
             pipe.x,
+
             pipe.topHeight + pipeGap - 20
         );
 
@@ -545,371 +612,525 @@
         ctx.fill();
 
 
-        // -----------------------------
-        // BOTTOM CANNON
-        // -----------------------------
+        // Deck
 
-        ctx.fillStyle = "black";
+        ctx.fillStyle = "#8b5a2b";
+
+        ctx.fillRect(
+
+            pipe.x - 10,
+
+            pipe.topHeight + pipeGap + 10,
+
+            pipeWidth + 20,
+
+            8
+        );
+
+
+        // Mast
+
+        ctx.fillStyle = "#4a2a12";
+
+        ctx.fillRect(
+
+            pipe.x + pipeWidth / 2 - 3,
+
+            pipe.topHeight + pipeGap + 15,
+
+            6,
+
+            60
+        );
+
+
+        // Sail
+
+        ctx.fillStyle = "#f5f0d8";
 
         ctx.beginPath();
 
-        ctx.arc(
-            pipe.x + pipeWidth / 2,
-            pipe.topHeight + pipeGap + 8,
-            8,
-            0,
-            Math.PI * 2
+        ctx.moveTo(
+
+            pipe.x + pipeWidth / 2 + 3,
+
+            pipe.topHeight + pipeGap + 20
         );
 
+        ctx.lineTo(
+
+            pipe.x + pipeWidth / 2 + 35,
+
+            pipe.topHeight + pipeGap + 55
+        );
+
+        ctx.lineTo(
+
+            pipe.x + pipeWidth / 2 + 3,
+
+            pipe.topHeight + pipeGap + 55
+        );
+
+        ctx.closePath();
+
         ctx.fill();
+
+
+        // Pirate flag
+
+        ctx.fillStyle = "black";
+
+        ctx.fillRect(
+
+            pipe.x + pipeWidth / 2 - 2,
+
+            pipe.topHeight + pipeGap + 70,
+
+            35,
+
+            20
+        );
+
+
+        ctx.fillStyle = "white";
+
+        ctx.font = "14px Arial";
+
+        ctx.fillText(
+
+            "☠",
+
+            pipe.x + pipeWidth / 2 + 15,
+
+            pipe.topHeight + pipeGap + 85
+        );
+
+
+        // Bottom cannon
+
+        ctx.fillStyle = "black";
+
+        ctx.fillRect(
+
+            pipe.x + pipeWidth - 5,
+
+            pipe.topHeight + pipeGap + 2,
+
+            25,
+
+            8
+        );
 
     });
 }
-        /* ------------------------------
-           DRAW SCORE
-        ------------------------------ */
-
-        function drawScore() {
-
-            ctx.fillStyle = "white";
-
-            ctx.textAlign = "center";
 
 
-            /*
-            CURRENT SCORE
-            */
+// =========================
+// UPDATE CANNONBALLS
+// =========================
 
-            ctx.font = "30px Arial";
+function updateCannonballs() {
 
-            ctx.fillText(
+    cannonballs.forEach(function(ball) {
 
-                "Score: " + score,
+        ball.x += ball.velocityX;
 
-                canvas.width / 2,
+        ball.y += ball.velocityY;
+    });
 
-                40
 
+    cannonballs = cannonballs.filter(function(ball) {
+
+        return (
+
+            ball.x > -20 &&
+
+            ball.y > -20 &&
+
+            ball.y < canvas.height + 20
+        );
+    });
+}
+
+
+// =========================
+// DRAW CANNONBALLS
+// =========================
+
+function drawCannonballs() {
+
+    ctx.fillStyle = "black";
+
+
+    cannonballs.forEach(function(ball) {
+
+        ctx.beginPath();
+
+
+        ctx.arc(
+
+            ball.x,
+
+            ball.y,
+
+            cannonballRadius,
+
+            0,
+
+            Math.PI * 2
+        );
+
+
+        ctx.fill();
+    });
+}
+
+
+// =========================
+// SCORE
+// =========================
+
+function drawScore() {
+
+    ctx.fillStyle = "white";
+
+    ctx.textAlign = "center";
+
+
+    ctx.font = "30px Arial";
+
+
+    ctx.fillText(
+
+        "Score: " + score,
+
+        canvas.width / 2,
+
+        40
+    );
+
+
+    ctx.font = "18px Arial";
+
+
+    ctx.fillText(
+
+        "High Score: " + highScore,
+
+        canvas.width / 2,
+
+        65
+    );
+}
+
+
+// =========================
+// PIPE COLLISION
+// =========================
+
+function checkCollision(pipe) {
+
+    const birdRight =
+
+        bird.x + bird.width;
+
+
+    const birdBottom =
+
+        bird.y + bird.height;
+
+
+    const pipeRight =
+
+        pipe.x + pipeWidth;
+
+
+    const hitPipe =
+
+        birdRight > pipe.x &&
+
+        bird.x < pipeRight &&
+
+        (
+
+            bird.y < pipe.topHeight ||
+
+            birdBottom >
+
+            pipe.topHeight + pipeGap
+        );
+
+
+    return hitPipe;
+}
+
+
+// =========================
+// CANNONBALL COLLISION
+// =========================
+
+function checkCannonballCollision() {
+
+    for (let ball of cannonballs) {
+
+
+        const dx =
+
+            ball.x -
+
+            (bird.x + bird.width / 2);
+
+
+        const dy =
+
+            ball.y -
+
+            (bird.y + bird.height / 2);
+
+
+        const distance =
+
+            Math.sqrt(
+
+                dx * dx +
+
+                dy * dy
             );
 
 
-            /*
-            HIGH SCORE
-            */
+        if (
 
-            ctx.font = "18px Arial";
+            distance <
 
-            ctx.fillText(
+            cannonballRadius +
 
-                "High Score: " + highScore,
+            bird.width / 2
+        ) {
 
-                canvas.width / 2,
+            return true;
+        }
+    }
 
-                65
 
-            );
+    return false;
+}
 
+
+// =========================
+// GAME OVER
+// =========================
+
+function gameOver() {
+
+    gameRunning = false;
+
+
+    if (score > highScore) {
+
+        highScore = score;
+
+
+        localStorage.setItem(
+
+            "flappyBeanHighScore",
+
+            highScore
+        );
+    }
+
+
+    document.getElementById(
+
+        "finalScore"
+
+    ).textContent = score;
+
+
+    document.getElementById(
+
+        "finalHighScore"
+
+    ).textContent = highScore;
+
+
+    document.getElementById(
+
+        "gameOver"
+
+    ).style.display = "block";
+}
+
+
+// =========================
+// RESTART
+// =========================
+
+function restartGame() {
+
+    startGame();
+}
+
+
+// =========================
+// GAME LOOP
+// =========================
+
+function gameLoop() {
+
+    if (!gameRunning) {
+
+        return;
+    }
+
+
+    ctx.clearRect(
+
+        0,
+
+        0,
+
+        canvas.width,
+
+        canvas.height
+    );
+
+
+    // Bird physics
+
+    bird.velocity += gravity;
+
+    bird.y += bird.velocity;
+
+
+    // Add new pipe
+
+    if (
+
+        pipes.length === 0 ||
+
+        pipes[pipes.length - 1].x < 220
+    ) {
+
+        addPipe();
+    }
+
+
+    // Move pipes
+
+    pipes.forEach(function(pipe) {
+
+        pipe.x -= pipeSpeed;
+
+
+        // =========================
+        // CANNONS START AT 15
+        // =========================
+
+        if (
+
+            score >= 15 &&
+
+            !pipe.fired &&
+
+            pipe.x < bird.x + 150
+        ) {
+
+            fireCannon(pipe);
+
+            pipe.fired = true;
         }
 
 
+        // Score
 
-        /* ------------------------------
-           CHECK FOR COLLISION
-        ------------------------------ */
+        if (
 
-        function checkCollision(pipe) {
+            !pipe.passed &&
 
+            pipe.x + pipeWidth < bird.x
+        ) {
 
-            const birdRight =
-                bird.x + bird.width;
+            score++;
 
-
-            const birdBottom =
-                bird.y + bird.height;
-
-
-            const pipeRight =
-                pipe.x + pipeWidth;
-
-
-            const hitPipe =
-
-                birdRight > pipe.x &&
-
-                bird.x < pipeRight &&
-
-                (
-
-                    bird.y < pipe.topHeight ||
-
-                    birdBottom >
-                    pipe.topHeight + pipeGap
-
-                );
-
-
-            return hitPipe;
-
+            pipe.passed = true;
         }
 
+    });
 
 
-        /* ------------------------------
-           GAME OVER
-        ------------------------------ */
+    // Remove old pipes
 
-        function gameOver() {
+    pipes = pipes.filter(function(pipe) {
 
-            gameRunning = false;
-
-
-            /*
-            Check whether we have
-            a new high score.
-            */
-
-            if (score > highScore) {
-
-                highScore = score;
+        return pipe.x + pipeWidth > 0;
+    });
 
 
-                /*
-                Save the high score
-                in the browser.
-                */
+    // Move cannonballs
 
-                localStorage.setItem(
-
-                    "flappyBeanHighScore",
-
-                    highScore
-
-                );
-
-            }
+    updateCannonballs();
 
 
-            /*
-            Show final score.
-            */
+    // Screen boundaries
 
-            document.getElementById(
-                "finalScore"
-            ).textContent = score;
+    if (
 
+        bird.y < 0 ||
 
-            /*
-            Show high score.
-            */
+        bird.y + bird.height > canvas.height
+    ) {
 
-            document.getElementById(
-                "finalHighScore"
-            ).textContent = highScore;
+        gameOver();
+
+        return;
+    }
 
 
-            /*
-            Show Game Over box.
-            */
+    // Pipe collision
 
-            document.getElementById(
-                "gameOver"
-            ).style.display = "block";
+    for (let pipe of pipes) {
 
+        if (checkCollision(pipe)) {
+
+            gameOver();
+
+            return;
         }
+    }
 
 
+    // Cannonball collision
 
-        /* ------------------------------
-           RESTART GAME
-        ------------------------------ */
+    if (checkCannonballCollision()) {
 
-        function restartGame() {
+        gameOver();
 
-            startGame();
+        return;
+    }
 
-        }
 
+    // Draw everything
 
+    drawPipes();
 
-        /* ------------------------------
-           MAIN GAME LOOP
-        ------------------------------ */
+    drawCannonballs();
 
-        function gameLoop() {
+    drawBird();
 
+    drawScore();
 
-            /*
-            Stop the game if
-            Game Over happened.
-            */
 
-            if (!gameRunning) {
+    requestAnimationFrame(gameLoop);
+}
 
-                return;
 
-            }
+// =========================
+// START
+// =========================
 
+startGame();
 
-            /*
-            Clear the previous frame.
-            */
-
-            ctx.clearRect(
-
-                0,
-
-                0,
-
-                canvas.width,
-
-                canvas.height
-
-            );
-
-
-            /* --------------------------
-               BEAN PHYSICS
-            -------------------------- */
-
-            bird.velocity += gravity;
-
-            bird.y += bird.velocity;
-
-
-
-            /* --------------------------
-               ADD NEW PIPES
-            -------------------------- */
-
-            if (
-
-                pipes.length === 0 ||
-
-                pipes[pipes.length - 1].x < 220
-
-            ) {
-
-                addPipe();
-
-            }
-
-
-
-            /* --------------------------
-               MOVE PIPES
-            -------------------------- */
-
-            pipes.forEach(function(pipe) {
-
-                pipe.x -= pipeSpeed;
-
-
-                /*
-                Give the player a point
-                when they pass the pipe.
-                */
-
-                if (
-
-                    !pipe.passed &&
-
-                    pipe.x + pipeWidth < bird.x
-
-                ) {
-
-                    score++;
-
-                    pipe.passed = true;
-
-                }
-
-            });
-
-
-
-            /* --------------------------
-               REMOVE OLD PIPES
-            -------------------------- */
-
-            pipes = pipes.filter(function(pipe) {
-
-                return pipe.x + pipeWidth > 0;
-
-            });
-
-
-
-            /* --------------------------
-               CHECK CEILING / GROUND
-            -------------------------- */
-
-            if (
-
-                bird.y < 0 ||
-
-                bird.y + bird.height >
-                canvas.height
-
-            ) {
-
-                gameOver();
-
-                return;
-
-            }
-
-
-
-            /* --------------------------
-               CHECK PIPES
-            -------------------------- */
-
-            for (let pipe of pipes) {
-
-                if (checkCollision(pipe)) {
-
-                    gameOver();
-
-                    return;
-
-                }
-
-            }
-
-
-
-            /* --------------------------
-               DRAW EVERYTHING
-            -------------------------- */
-
-            drawPipes();
-
-            drawBird();
-
-            drawScore();
-
-
-
-            /*
-            Run the game again
-            on the next animation frame.
-            */
-
-            requestAnimationFrame(gameLoop);
-
-        }
-
-
-
-        /* ------------------------------
-           START THE GAME
-        ------------------------------ */
-
-        startGame();
-
-
-    </script>
+</script>
 
 </body>
-
 </html>
