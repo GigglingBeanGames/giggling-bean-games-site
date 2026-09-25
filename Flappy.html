@@ -1,375 +1,798 @@
 <!DOCTYPE html>
 <html>
+
 <head>
+
     <title>Flappy Bean</title>
 
     <style>
+
+        /* ------------------------------
+           PAGE
+        ------------------------------ */
+
         body {
             margin: 0;
-            background: #87CEEB;
+            background: skyblue;
+
             display: flex;
             justify-content: center;
             align-items: center;
+
             height: 100vh;
+
             font-family: Arial, sans-serif;
         }
+
+
+        /* ------------------------------
+           GAME CONTAINER
+        ------------------------------ */
 
         .game-container {
             position: relative;
         }
 
+
+        /* ------------------------------
+           GAME CANVAS
+        ------------------------------ */
+
         canvas {
             display: block;
-            border: 4px solid #333;
-            background: #87CEEB;
+
+            border: 4px solid black;
+
+            background: skyblue;
         }
 
+
+        /* ------------------------------
+           GAME OVER BOX
+        ------------------------------ */
+
         #gameOver {
+
             position: absolute;
+
             top: 50%;
             left: 50%;
+
             transform: translate(-50%, -50%);
+
             text-align: center;
+
             background: white;
+
             padding: 25px;
+
             border-radius: 15px;
+
             display: none;
         }
 
-        #gameOver h1 {
-            margin-top: 0;
-        }
+
+        /* ------------------------------
+           RESTART BUTTON
+        ------------------------------ */
 
         button {
+
             padding: 10px 20px;
+
             font-size: 18px;
+
             border: none;
+
             border-radius: 8px;
+
             cursor: pointer;
         }
+
     </style>
+
 </head>
+
 
 <body>
 
-<div class="game-container">
 
-    <canvas id="game" width="400" height="600"></canvas>
+    <!-- ==============================
+         GAME
+    =============================== -->
 
-    <div id="gameOver">
-        <h1>Game Over!</h1>
-        <p>Score: <span id="finalScore">0</span></p>
-        <button onclick="restartGame()">Play Again</button>
+    <div class="game-container">
+
+        <canvas id="game" width="400" height="600"></canvas>
+
+
+        <!-- GAME OVER SCREEN -->
+
+        <div id="gameOver">
+
+            <h1>Game Over!</h1>
+
+            <p>
+                Score:
+                <span id="finalScore">0</span>
+            </p>
+
+            <p>
+                High Score:
+                <span id="finalHighScore">0</span>
+            </p>
+
+            <button onclick="restartGame()">
+                Play Again
+            </button>
+
+        </div>
+
     </div>
 
-</div>
 
-<script>
 
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+    <!-- ==============================
+         JAVASCRIPT
+    =============================== -->
 
-let bird;
-let pipes;
-let score;
-let gameRunning;
+    <script>
 
-const gravity = 0.5;
-const jumpStrength = -8;
-const pipeWidth = 60;
-const pipeGap = 160;
-const pipeSpeed = 2.5;
 
+        /* ------------------------------
+           SET UP THE GAME
+        ------------------------------ */
 
-// Start the game
-function startGame() {
+        const canvas = document.getElementById("game");
 
-    bird = {
-        x: 80,
-        y: 300,
-        width: 30,
-        height: 30,
-        velocity: 0
-    };
+        const ctx = canvas.getContext("2d");
 
-    pipes = [];
-    score = 0;
-    gameRunning = true;
 
-    document.getElementById("gameOver").style.display = "none";
+        /* ------------------------------
+           LOAD THE BEAN LOGO
+        ------------------------------ */
 
-    addPipe();
+        const beanLogo = new Image();
 
-    gameLoop();
-}
+        beanLogo.src = "images/navbarLogo.jpeg";
 
 
-// Create a pipe
-function addPipe() {
+        /*
+        If navbarLogo.jpeg isn't the picture
+        you want, change it to:
 
-    const gapY = Math.floor(
-        Math.random() * (canvas.height - pipeGap - 100)
-    ) + 50;
+        beanLogo.src = "images/logo.jpeg";
+        */
 
-    pipes.push({
-        x: canvas.width,
-        topHeight: gapY,
-        passed: false
-    });
-}
 
 
-// Make the bird jump
-function flap() {
+        /* ------------------------------
+           HIGH SCORE
+        ------------------------------ */
 
-    if (gameRunning) {
-        bird.velocity = jumpStrength;
-    }
-}
+        let highScore =
+            Number(localStorage.getItem("flappyBeanHighScore")) || 0;
 
 
-// Keyboard controls
-document.addEventListener("keydown", function(event) {
 
-    if (event.code === "Space") {
-        event.preventDefault();
-        flap();
-    }
+        /* ------------------------------
+           GAME VARIABLES
+        ------------------------------ */
 
-});
+        let bird;
 
+        let pipes;
 
-// Mouse controls
-canvas.addEventListener("click", function() {
-    flap();
-});
+        let score;
 
+        let gameRunning;
 
-// Draw bird
-function drawBird() {
 
-    ctx.fillStyle = "#8B4513";
 
-    ctx.beginPath();
+        /* ------------------------------
+           GAME SETTINGS
+        ------------------------------ */
 
-    ctx.ellipse(
-        bird.x + 15,
-        bird.y + 15,
-        15,
-        15,
-        0,
-        0,
-        Math.PI * 2
-    );
+        const gravity = 0.5;
 
-    ctx.fill();
+        const jumpStrength = -8;
 
-    // Eye
-    ctx.fillStyle = "white";
+        const pipeWidth = 60;
 
-    ctx.beginPath();
+        const pipeGap = 160;
 
-    ctx.arc(
-        bird.x + 21,
-        bird.y + 9,
-        5,
-        0,
-        Math.PI * 2
-    );
+        const pipeSpeed = 2.5;
 
-    ctx.fill();
 
-    // Pupil
-    ctx.fillStyle = "black";
 
-    ctx.beginPath();
+        /* ------------------------------
+           START GAME
+        ------------------------------ */
 
-    ctx.arc(
-        bird.x + 22,
-        bird.y + 9,
-        2,
-        0,
-        Math.PI * 2
-    );
+        function startGame() {
 
-    ctx.fill();
-}
+            bird = {
 
+                x: 80,
 
-// Draw pipes
-function drawPipes() {
+                y: 300,
 
-    ctx.fillStyle = "#228B22";
+                width: 35,
 
-    pipes.forEach(pipe => {
+                height: 35,
 
-        // Top pipe
-        ctx.fillRect(
-            pipe.x,
-            0,
-            pipeWidth,
-            pipe.topHeight
-        );
+                velocity: 0
 
-        // Bottom pipe
-        ctx.fillRect(
-            pipe.x,
-            pipe.topHeight + pipeGap,
-            pipeWidth,
-            canvas.height
-        );
+            };
 
-    });
 
-}
+            pipes = [];
 
+            score = 0;
 
-// Draw score
-function drawScore() {
+            gameRunning = true;
 
-    ctx.fillStyle = "white";
-    ctx.font = "40px Arial";
-    ctx.textAlign = "center";
 
-    ctx.fillText(
-        score,
-        canvas.width / 2,
-        60
-    );
+            document.getElementById("gameOver").style.display = "none";
 
-}
 
+            addPipe();
 
-// Check collisions
-function checkCollision(pipe) {
+            gameLoop();
 
-    const birdRight = bird.x + bird.width;
-    const birdBottom = bird.y + bird.height;
-
-    const pipeRight = pipe.x + pipeWidth;
-
-    const hitPipe =
-        birdRight > pipe.x &&
-        bird.x < pipeRight &&
-        (
-            bird.y < pipe.topHeight ||
-            birdBottom > pipe.topHeight + pipeGap
-        );
-
-    return hitPipe;
-}
-
-
-// End the game
-function gameOver() {
-
-    gameRunning = false;
-
-    document.getElementById("finalScore").textContent = score;
-
-    document.getElementById("gameOver").style.display = "block";
-}
-
-
-// Restart
-function restartGame() {
-
-    startGame();
-
-}
-
-
-// Main game loop
-function gameLoop() {
-
-    if (!gameRunning) {
-        return;
-    }
-
-    ctx.clearRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
-
-
-    // Bird physics
-    bird.velocity += gravity;
-    bird.y += bird.velocity;
-
-
-    // Add pipes
-    if (
-        pipes.length === 0 ||
-        pipes[pipes.length - 1].x < 220
-    ) {
-        addPipe();
-    }
-
-
-    // Move pipes
-    pipes.forEach(pipe => {
-
-        pipe.x -= pipeSpeed;
-
-        // Score when bird passes pipe
-        if (
-            !pipe.passed &&
-            pipe.x + pipeWidth < bird.x
-        ) {
-
-            score++;
-
-            pipe.passed = true;
         }
 
-    });
 
 
-    // Remove old pipes
-    pipes = pipes.filter(
-        pipe => pipe.x + pipeWidth > 0
-    );
+        /* ------------------------------
+           CREATE A PIPE
+        ------------------------------ */
+
+        function addPipe() {
+
+            const gapY =
+                Math.floor(
+                    Math.random() *
+                    (canvas.height - pipeGap - 100)
+                ) + 50;
 
 
-    // Check ground and ceiling
-    if (
-        bird.y < 0 ||
-        bird.y + bird.height > canvas.height
-    ) {
+            pipes.push({
 
-        gameOver();
-        return;
-    }
+                x: canvas.width,
 
+                topHeight: gapY,
 
-    // Check pipes
-    for (let pipe of pipes) {
+                passed: false
 
-        if (checkCollision(pipe)) {
+            });
 
-            gameOver();
-            return;
         }
 
-    }
 
 
-    // Draw everything
-    drawPipes();
-    drawBird();
-    drawScore();
+        /* ------------------------------
+           MAKE BEAN JUMP
+        ------------------------------ */
+
+        function flap() {
+
+            if (gameRunning) {
+
+                bird.velocity = jumpStrength;
+
+            }
+
+        }
 
 
-    requestAnimationFrame(gameLoop);
-}
+
+        /* ------------------------------
+           SPACEBAR CONTROL
+        ------------------------------ */
+
+        document.addEventListener("keydown", function(event) {
+
+            if (event.code === "Space") {
+
+                event.preventDefault();
+
+                flap();
+
+            }
+
+        });
 
 
-// Start
-startGame();
 
-</script>
+        /* ------------------------------
+           MOUSE CONTROL
+        ------------------------------ */
+
+        canvas.addEventListener("click", function() {
+
+            flap();
+
+        });
+
+
+
+        /* ------------------------------
+           DRAW THE BEAN
+        ------------------------------ */
+
+        function drawBird() {
+
+
+            /*
+            Save the canvas before rotating.
+            */
+
+            ctx.save();
+
+
+            /*
+            Move the canvas to the
+            center of the bean.
+            */
+
+            ctx.translate(
+
+                bird.x + bird.width / 2,
+
+                bird.y + bird.height / 2
+
+            );
+
+
+            /*
+            Calculate rotation.
+
+            When the bean is going up,
+            it tilts upward.
+
+            When the bean is falling,
+            it tilts downward.
+            */
+
+            let rotation = bird.velocity * 0.05;
+
+
+            /*
+            Prevent it from rotating
+            too far.
+            */
+
+            rotation = Math.max(
+                -0.5,
+                Math.min(rotation, 1.2)
+            );
+
+
+            ctx.rotate(rotation);
+
+
+            /*
+            Draw the bean logo.
+            */
+
+            ctx.drawImage(
+
+                beanLogo,
+
+                -bird.width / 2,
+
+                -bird.height / 2,
+
+                bird.width,
+
+                bird.height
+
+            );
+
+
+            /*
+            Restore the canvas.
+            */
+
+            ctx.restore();
+
+        }
+
+
+
+        /* ------------------------------
+           DRAW PIPES
+        ------------------------------ */
+
+        function drawPipes() {
+
+            ctx.fillStyle = "green";
+
+
+            pipes.forEach(function(pipe) {
+
+
+                /* TOP PIPE */
+
+                ctx.fillRect(
+
+                    pipe.x,
+
+                    0,
+
+                    pipeWidth,
+
+                    pipe.topHeight
+
+                );
+
+
+                /* BOTTOM PIPE */
+
+                ctx.fillRect(
+
+                    pipe.x,
+
+                    pipe.topHeight + pipeGap,
+
+                    pipeWidth,
+
+                    canvas.height
+
+                );
+
+            });
+
+        }
+
+
+
+        /* ------------------------------
+           DRAW SCORE
+        ------------------------------ */
+
+        function drawScore() {
+
+            ctx.fillStyle = "white";
+
+            ctx.textAlign = "center";
+
+
+            /*
+            CURRENT SCORE
+            */
+
+            ctx.font = "30px Arial";
+
+            ctx.fillText(
+
+                "Score: " + score,
+
+                canvas.width / 2,
+
+                40
+
+            );
+
+
+            /*
+            HIGH SCORE
+            */
+
+            ctx.font = "18px Arial";
+
+            ctx.fillText(
+
+                "High Score: " + highScore,
+
+                canvas.width / 2,
+
+                65
+
+            );
+
+        }
+
+
+
+        /* ------------------------------
+           CHECK FOR COLLISION
+        ------------------------------ */
+
+        function checkCollision(pipe) {
+
+
+            const birdRight =
+                bird.x + bird.width;
+
+
+            const birdBottom =
+                bird.y + bird.height;
+
+
+            const pipeRight =
+                pipe.x + pipeWidth;
+
+
+            const hitPipe =
+
+                birdRight > pipe.x &&
+
+                bird.x < pipeRight &&
+
+                (
+
+                    bird.y < pipe.topHeight ||
+
+                    birdBottom >
+                    pipe.topHeight + pipeGap
+
+                );
+
+
+            return hitPipe;
+
+        }
+
+
+
+        /* ------------------------------
+           GAME OVER
+        ------------------------------ */
+
+        function gameOver() {
+
+            gameRunning = false;
+
+
+            /*
+            Check whether we have
+            a new high score.
+            */
+
+            if (score > highScore) {
+
+                highScore = score;
+
+
+                /*
+                Save the high score
+                in the browser.
+                */
+
+                localStorage.setItem(
+
+                    "flappyBeanHighScore",
+
+                    highScore
+
+                );
+
+            }
+
+
+            /*
+            Show final score.
+            */
+
+            document.getElementById(
+                "finalScore"
+            ).textContent = score;
+
+
+            /*
+            Show high score.
+            */
+
+            document.getElementById(
+                "finalHighScore"
+            ).textContent = highScore;
+
+
+            /*
+            Show Game Over box.
+            */
+
+            document.getElementById(
+                "gameOver"
+            ).style.display = "block";
+
+        }
+
+
+
+        /* ------------------------------
+           RESTART GAME
+        ------------------------------ */
+
+        function restartGame() {
+
+            startGame();
+
+        }
+
+
+
+        /* ------------------------------
+           MAIN GAME LOOP
+        ------------------------------ */
+
+        function gameLoop() {
+
+
+            /*
+            Stop the game if
+            Game Over happened.
+            */
+
+            if (!gameRunning) {
+
+                return;
+
+            }
+
+
+            /*
+            Clear the previous frame.
+            */
+
+            ctx.clearRect(
+
+                0,
+
+                0,
+
+                canvas.width,
+
+                canvas.height
+
+            );
+
+
+            /* --------------------------
+               BEAN PHYSICS
+            -------------------------- */
+
+            bird.velocity += gravity;
+
+            bird.y += bird.velocity;
+
+
+
+            /* --------------------------
+               ADD NEW PIPES
+            -------------------------- */
+
+            if (
+
+                pipes.length === 0 ||
+
+                pipes[pipes.length - 1].x < 220
+
+            ) {
+
+                addPipe();
+
+            }
+
+
+
+            /* --------------------------
+               MOVE PIPES
+            -------------------------- */
+
+            pipes.forEach(function(pipe) {
+
+                pipe.x -= pipeSpeed;
+
+
+                /*
+                Give the player a point
+                when they pass the pipe.
+                */
+
+                if (
+
+                    !pipe.passed &&
+
+                    pipe.x + pipeWidth < bird.x
+
+                ) {
+
+                    score++;
+
+                    pipe.passed = true;
+
+                }
+
+            });
+
+
+
+            /* --------------------------
+               REMOVE OLD PIPES
+            -------------------------- */
+
+            pipes = pipes.filter(function(pipe) {
+
+                return pipe.x + pipeWidth > 0;
+
+            });
+
+
+
+            /* --------------------------
+               CHECK CEILING / GROUND
+            -------------------------- */
+
+            if (
+
+                bird.y < 0 ||
+
+                bird.y + bird.height >
+                canvas.height
+
+            ) {
+
+                gameOver();
+
+                return;
+
+            }
+
+
+
+            /* --------------------------
+               CHECK PIPES
+            -------------------------- */
+
+            for (let pipe of pipes) {
+
+                if (checkCollision(pipe)) {
+
+                    gameOver();
+
+                    return;
+
+                }
+
+            }
+
+
+
+            /* --------------------------
+               DRAW EVERYTHING
+            -------------------------- */
+
+            drawPipes();
+
+            drawBird();
+
+            drawScore();
+
+
+
+            /*
+            Run the game again
+            on the next animation frame.
+            */
+
+            requestAnimationFrame(gameLoop);
+
+        }
+
+
+
+        /* ------------------------------
+           START THE GAME
+        ------------------------------ */
+
+        startGame();
+
+
+    </script>
 
 </body>
+
 </html>
