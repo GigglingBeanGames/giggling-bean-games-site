@@ -405,49 +405,166 @@
            DRAW PIPES
         ------------------------------ */
 
-        function drawPipes() {
+       function drawPipes() {
 
-            ctx.fillStyle = "green";
+    // Before 10 points = normal pipes
+    if (score < 10) {
 
+        ctx.fillStyle = "green";
 
-            pipes.forEach(function(pipe) {
+        pipes.forEach(function(pipe) {
 
+            // Top pipe
+            ctx.fillRect(
+                pipe.x,
+                0,
+                pipeWidth,
+                pipe.topHeight
+            );
 
-                /* TOP PIPE */
+            // Bottom pipe
+            ctx.fillRect(
+                pipe.x,
+                pipe.topHeight + pipeGap,
+                pipeWidth,
+                canvas.height
+            );
 
-                ctx.fillRect(
+        });
 
-                    pipe.x,
-
-                    0,
-
-                    pipeWidth,
-
-                    pipe.topHeight
-
-                );
-
-
-                /* BOTTOM PIPE */
-
-                ctx.fillRect(
-
-                    pipe.x,
-
-                    pipe.topHeight + pipeGap,
-
-                    pipeWidth,
-
-                    canvas.height
-
-                );
-
-            });
-
-        }
+        return;
+    }
 
 
+    // =================================
+    // PIRATE MODE
+    // =================================
 
+    pipes.forEach(function(pipe) {
+
+        // -----------------------------
+        // TOP PIRATE SHIP
+        // -----------------------------
+
+        ctx.fillStyle = "#5c3317";
+
+        ctx.fillRect(
+            pipe.x - 10,
+            pipe.topHeight - 25,
+            pipeWidth + 20,
+            25
+        );
+
+
+        // Ship hull
+        ctx.beginPath();
+
+        ctx.moveTo(
+            pipe.x - 15,
+            pipe.topHeight
+        );
+
+        ctx.lineTo(
+            pipe.x + pipeWidth + 15,
+            pipe.topHeight
+        );
+
+        ctx.lineTo(
+            pipe.x + pipeWidth,
+            pipe.topHeight + 20
+        );
+
+        ctx.lineTo(
+            pipe.x,
+            pipe.topHeight + 20
+        );
+
+        ctx.closePath();
+
+        ctx.fill();
+
+
+        // -----------------------------
+        // TOP CANNON
+        // -----------------------------
+
+        ctx.fillStyle = "black";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            pipe.x + pipeWidth / 2,
+            pipe.topHeight - 8,
+            8,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+
+
+        // -----------------------------
+        // BOTTOM PIRATE SHIP
+        // -----------------------------
+
+        ctx.fillStyle = "#5c3317";
+
+        ctx.fillRect(
+            pipe.x - 10,
+            pipe.topHeight + pipeGap,
+            pipeWidth + 20,
+            25
+        );
+
+
+        // Bottom ship hull
+        ctx.beginPath();
+
+        ctx.moveTo(
+            pipe.x - 15,
+            pipe.topHeight + pipeGap
+        );
+
+        ctx.lineTo(
+            pipe.x + pipeWidth + 15,
+            pipe.topHeight + pipeGap
+        );
+
+        ctx.lineTo(
+            pipe.x + pipeWidth,
+            pipe.topHeight + pipeGap - 20
+        );
+
+        ctx.lineTo(
+            pipe.x,
+            pipe.topHeight + pipeGap - 20
+        );
+
+        ctx.closePath();
+
+        ctx.fill();
+
+
+        // -----------------------------
+        // BOTTOM CANNON
+        // -----------------------------
+
+        ctx.fillStyle = "black";
+
+        ctx.beginPath();
+
+        ctx.arc(
+            pipe.x + pipeWidth / 2,
+            pipe.topHeight + pipeGap + 8,
+            8,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+
+    });
+}
         /* ------------------------------
            DRAW SCORE
         ------------------------------ */
