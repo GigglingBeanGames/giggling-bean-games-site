@@ -59,6 +59,41 @@ body {
   flex-wrap: wrap;
 }
 
+.email-signup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.email-signup input {
+  padding: 8px 10px;
+  border: 1px solid white;
+  border-radius: 5px;
+  background: transparent;
+  color: white;
+  font-family: inherit;
+  font-size: inherit;
+  width: 140px;
+}
+
+.email-signup input::placeholder {
+  color: white;
+}
+
+.email-signup button {
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  color: white;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+.email-signup button:hover {
+  text-decoration: underline;
+}
+
 .nav-links a {
   color: white;
   text-decoration: none;
