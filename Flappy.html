@@ -153,17 +153,20 @@ function addPipe() {
             (canvas.height - pipeGap - 100)
         ) + 50;
 
-    pipes.push({
+  
+pipes.push({
 
-        x: canvas.width,
+    x: canvas.width,
 
-        topHeight: gapY,
+    topHeight: gapY,
 
-        passed: false,
+    passed: false,
 
-        fired: false
-    });
-}
+    fired: false,
+
+    number: (window.flappyBeanBoatCount = (window.flappyBeanBoatCount || 0) + 1)
+});
+
 
 
 // =========================
@@ -1088,17 +1091,22 @@ function gameLoop() {
     }
 
 
-    // Pipe collision
+ // Pipe collision
 
-    for (let pipe of pipes) {
+for (let pipe of pipes) {
 
-        if (checkCollision(pipe)) {
+    if (checkCollision(pipe)) {
 
-            gameOver();
-
+        if (pipe.number === 15) {
+            window.location.href = "https://treasuretempest.com/";
             return;
         }
+
+        gameOver();
+
+        return;
     }
+}
 
 
     // Cannonball collision
