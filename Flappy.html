@@ -89,6 +89,7 @@ let pipes;
 let cannonballs;
 let score;
 let gameRunning;
+let boatCount;
 
 
 // =========================
@@ -130,6 +131,7 @@ function startGame() {
     cannonballs = [];
 
     score = 0;
+      boatCount = 0;
 
     gameRunning = true;
 
@@ -137,7 +139,7 @@ function startGame() {
 
     addPipe();
 
-    gameLoop();
+gameLoop();
 }
 
 
@@ -164,10 +166,9 @@ pipes.push({
 
     fired: false,
 
-    number: (window.flappyBeanBoatCount = (window.flappyBeanBoatCount || 0) + 1)
+    number: ++boatCount
 });
-
-
+}
 
 // =========================
 // FIRE CANNON
@@ -1091,13 +1092,14 @@ function gameLoop() {
     }
 
 
- // Pipe collision
+  // Pipe collision
 
 for (let pipe of pipes) {
 
     if (checkCollision(pipe)) {
 
-        if (pipe.number === 15) {
+        // Redirect if the bean hits the 15th top boat
+        if (pipe.number === 15 && bird.y < pipe.topHeight) {
             window.location.href = "https://treasuretempest.com/";
             return;
         }
@@ -1107,8 +1109,6 @@ for (let pipe of pipes) {
         return;
     }
 }
-
-
     // Cannonball collision
 
     if (checkCannonballCollision()) {
