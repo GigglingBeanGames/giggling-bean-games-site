@@ -1,7 +1,10 @@
 * {
   box-sizing: border-box;
 }
-
+img {
+  max-width: 100%;
+  height: auto;
+}
 html {
   scroll-behavior: smooth;
 }
@@ -271,24 +274,76 @@ body {
   font-size: 18px;
 }
 
+
 /* MOBILE */
 
 @media (max-width: 800px) {
-  nav {
-    flex-direction: column;
-    gap: 15px;
+  .wood-nav {
+    height: auto;
+    min-height: 72px;
+    overflow: visible;
+  }
+
+  .nav-content {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .navbar-logo {
+    height: 52px;
   }
 
   .nav-links {
     justify-content: center;
+    gap: 6px;
+  }
+
+  .nav-links a {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .hero {
+    min-height: auto;
+    padding: 40px 15px;
+  }
+
+  .hero-content {
+    width: 100%;
+    margin-top: 20px;
+    padding: 25px 18px;
   }
 
   .hero-content h2 {
-    font-size: 36px;
+    font-size: 32px;
   }
 
-  .wood-banner {
-    width: 95%;
+  .hero-content p {
+    font-size: 16px;
+  }
+
+  .section {
+    padding: 45px 15px;
+  }
+
+  .section h2 {
+    font-size: 32px;
+  }
+
+  .game-link {
+    width: 100%;
+    max-width: 380px;
+  }
+
+  .game-card {
+    width: 100%;
+  }
+
+  .email-signup {
+    justify-content: center;
+    max-width: 100%;
   }
 }
 
