@@ -394,10 +394,13 @@ body {
 }
 
 
+
 .membership-card img {
-  width: 180px;
-  height: auto;
-  max-width: 100%;
+  width: 120px !important;
+  height: auto !important;
+  max-width: 120px !important;
+  object-fit: contain;
   display: block;
   margin: 0 auto;
 }
+
