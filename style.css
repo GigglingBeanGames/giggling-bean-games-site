@@ -394,13 +394,29 @@ body {
 }
 
 
+/* Membership images side by side */
+.membership-card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
 
 .membership-card img {
-  width: 120px !important;
+  width: 180px !important;
   height: auto !important;
-  max-width: 120px !important;
-  object-fit: contain;
+  max-width: 160% !important;
   display: block;
-  margin: 0 auto;
+}
+
+.membership-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;
+  flex-wrap: nowrap;
+  width: 100%;
 }
 
