@@ -520,50 +520,107 @@ body {
   height: auto !important;
   white-space: normal !important;
 }
+
+
+/* POPUP BOX */
 .popup-box {
   position: relative;
   background: #f7f0d8;
   color: #21160f;
   border: 4px solid #a4cf03;
   border-radius: 18px;
-  padding: 35px 25px;
-  max-width: 420px;
+  padding: 40px 28px 28px;
+  max-width: 440px;
   width: 100%;
   text-align: center;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
 }
 
-.popup-box h2 {
-  color: #a4cf03;
-  font-size: 28px;
-  margin-top: 0;
+/* CLOSE X IN TOP-RIGHT CORNER */
+.popup-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: #21160f;
+  font-size: 30px;
+  font-weight: bold;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
 }
 
-.popup-button {
-  display: inline-block;
+.popup-close:hover {
+  color: #a4cf03;
+}
+
+/* POPUP HEADING */
+.popup-box h2 {
+  color: #21160f;
+  font-size: 28px;
+  margin: 8px 0 14px;
+}
+
+.popup-box p {
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* EMAIL SIGNUP FORM */
+.popup-email-signup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.popup-email-signup input {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid #21160f;
+  border-radius: 8px;
+  background: white;
+  color: #21160f;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.popup-email-signup button {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid #21160f;
+  border-radius: 8px;
   background: #a4cf03;
   color: #21160f;
-  padding: 12px 22px;
-  border-radius: 8px;
-  text-decoration: none;
+  font-size: 16px;
   font-weight: bold;
-  margin-top: 12px;
+  cursor: pointer;
 }
 
-.popup-button:hover {
+.popup-email-signup button:hover {
   background: #8bb000;
 }
 
-.popup-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.65);
-  z-index: 99999;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
+.popup-box .popup-small {
+  font-size: 13px;
+  margin-bottom: 0;
+  opacity: 0.8;
+}
+
+@media (max-width: 480px) {
+  .popup-box {
+    padding: 40px 20px 22px;
+  }
+
+  .popup-box h2 {
+    font-size: 24px;
+  }
 }
