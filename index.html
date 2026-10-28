@@ -164,5 +164,32 @@
     </a>
   </div>
 </div>
+  <script>
+  const popup = document.getElementById("gamePopup");
+  const closeButton = document.getElementById("closePopup");
+  const popupLink = document.getElementById("popupLink");
+
+  // Show only once per browser tab session
+  if (!sessionStorage.getItem("gbgPopupClosed")) {
+    setTimeout(() => {
+      popup.style.display = "flex";
+    }, 12000);
+  }
+
+  function closeGamePopup() {
+    popup.style.display = "none";
+    sessionStorage.setItem("gbgPopupClosed", "true");
+  }
+
+  closeButton.addEventListener("click", closeGamePopup);
+  popupLink.addEventListener("click", closeGamePopup);
+
+  // Close if the visitor clicks outside the box
+  popup.addEventListener("click", (event) => {
+    if (event.target === popup) {
+      closeGamePopup();
+    }
+  });
+</script>
 </body>
 </html>
