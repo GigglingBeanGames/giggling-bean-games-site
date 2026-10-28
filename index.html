@@ -164,32 +164,39 @@
     </a>
   </div>
 </div>
-  <script>
+ 
+<script>
   const popup = document.getElementById("gamePopup");
   const closeButton = document.getElementById("closePopup");
   const popupLink = document.getElementById("popupLink");
 
-  // Show only once per browser tab session
-  if (!sessionStorage.getItem("gbgPopupClosed")) {
-    setTimeout(() => {
+  console.log("GBG popup script loaded:", !!popup);
+
+  if (popup && closeButton && popupLink) {
+    // Always show after 12 seconds while testing
+    setTimeout(function () {
       popup.style.display = "flex";
+      console.log("GBG popup displayed");
     }, 12000);
-  }
 
-  function closeGamePopup() {
-    popup.style.display = "none";
-    sessionStorage.setItem("gbgPopupClosed", "true");
-  }
-
-  closeButton.addEventListener("click", closeGamePopup);
-  popupLink.addEventListener("click", closeGamePopup);
-
-  // Close if the visitor clicks outside the box
-  popup.addEventListener("click", (event) => {
-    if (event.target === popup) {
-      closeGamePopup();
+    function closeGamePopup() {
+      popup.style.display = "none";
     }
-  });
+
+    closeButton.addEventListener("click", closeGamePopup);
+    popupLink.addEventListener("click", closeGamePopup);
+
+    popup.addEventListener("click", function (event) {
+      if (event.target === popup) {
+        closeGamePopup();
+      }
+    });
+  } else {
+    console.error("GBG popup: Missing HTML element.");
+  }
 </script>
+</body>
+</html>
+
 </body>
 </html>
