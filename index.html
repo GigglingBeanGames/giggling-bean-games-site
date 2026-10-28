@@ -148,23 +148,43 @@
     </div>
   </section>
 
-  <div id="gamePopup" class="popup-overlay">
+
+<div id="gamePopup" class="popup-overlay">
   <div class="popup-box">
-    <button class="popup-close" id="closePopup" aria-label="Close">&times;</button>
+
+    <button class="popup-close" id="closePopup"
+      aria-label="Close popup">&times;</button>
 
     <h2>🎲 Let the Fun Begin!</h2>
 
     <p>
       Love games that make people laugh?
-      Discover what's happening at Giggling Bean Games!
+      Sign up to hear about new games, special deals,
+      and upcoming Giggling Bean Games events!
     </p>
 
-    <a href="#games" class="popup-button" id="popupLink">
-      Explore Our Games
-    </a>
+    <form
+      action="https://manage.kmail-lists.com/subscriptions/subscribe?a=TsCnBX&g=SZkAGv"
+      method="POST"
+      class="popup-email-signup">
+
+      <input
+        type="email"
+        name="email"
+        placeholder="Enter your email address"
+        aria-label="Email address"
+        required>
+
+      <button type="submit">Sign Me Up!</button>
+    </form>
+
+    <p class="popup-small">
+      Fun games. Great deals. Good times.
+    </p>
+
   </div>
 </div>
- 
+
 <script>
   const popup = document.getElementById("gamePopup");
   const closeButton = document.getElementById("closePopup");
