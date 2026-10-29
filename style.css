@@ -250,7 +250,6 @@ input:focus-visible {
   color: var(--deep);
 }
 
-.newsletter::before { content: ""; position: absolute; top: -70px; right: 18%; width: 170px; height: 96px; border: 1px solid rgba(23, 78, 50, .12); border-radius: 50%; transform: rotate(-19deg); }
 .newsletter-inner { position: relative; z-index: 1; display: grid; grid-template-columns: 1.25fr .75fr; gap: 38px; align-items: center; width: min(1160px, 100%); margin: auto; }
 .newsletter-inner > div { padding: 0; }
 .newsletter .eyebrow.light { color: var(--forest); }
