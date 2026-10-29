@@ -696,3 +696,10 @@ input:focus-visible {
     font-size: 24px;
   }
 }
+.popup-bean {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  vertical-align: middle;
+  margin-right: 8px;
+}
