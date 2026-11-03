@@ -45,68 +45,70 @@
   <footer class="site-footer"><div class="footer-inner"><button class="footer-logo bean-burst-trigger" type="button" aria-label="Burst a shower of tiny Giggling Bean mascots"><img src="images/navbarLogo.jpeg" alt="Giggling Bean Games"></button><p>Games worth gathering for.</p><nav aria-label="Footer navigation"><a href="#games">Games</a><a href="our-story.html">Our story</a><a href="founders-club.html">Founders Club</a><a href="mailto:gigglingbeangames@email.com">Contact</a></nav><small>© <span id="year">2026</span> Giggling Bean Games</small></div></footer>
   <script src="script.js"></script>
   
-<div id="gamePopup" class="popup-overlay">
+<div id="gamePopup" class="popup-overlay" role="dialog" aria-modal="true" aria-labelledby="popupTitle">
   <div class="popup-box">
+    <div class="popup-header">
+      <button class="popup-close" id="closePopup" aria-label="Close popup" type="button">&times;</button>
+      <p class="popup-kicker">You’re invited</p>
+      <h2 id="popupTitle">Be first to hear what’s next.</h2>
+    </div>
 
-    <button
-      class="popup-close"
-      id="closePopup"
-      aria-label="Close popup"
-      type="button"
-    >&times;</button>
+    <div class="popup-body">
+      <p class="popup-intro">Join the Giggling Bean list for first looks at new games and a few good surprises along the way.</p>
 
-<h2>
-  <img src="images/Bean.png" alt="Giggling Bean Games Bean"
-       class="popup-bean">
-  Let the Fun Begin!
-</h2>
-    <p>
-      Love games that make people laugh? Sign up to hear
-      about new games, special deals, and upcoming
-      Giggling Bean Games events!
-    </p>
+      <ul class="popup-perks" aria-label="Email list benefits">
+        <li>New games</li>
+        <li>Giveaways</li>
+        <li>Discounts</li>
+      </ul>
 
-    <form
-      action="https://manage.kmail-lists.com/subscriptions/subscribe?a=TsCnBX&g=SZkAGv"
-      method="POST"
-      class="popup-email-signup"
-    >
-      <input
-        type="email"
-        name="email"
-        placeholder="Enter your email address"
-        aria-label="Email address"
-        required
+      <form
+        action="https://manage.kmail-lists.com/subscriptions/subscribe?a=TsCnBX&amp;g=SZkAGv"
+        method="POST"
+        class="popup-email-signup"
       >
+        <label class="sr-only" for="popupEmail">Email address</label>
+        <input id="popupEmail" type="email" name="email" placeholder="Email address" autocomplete="email" required>
+        <button type="submit">Join the list</button>
+      </form>
 
-      <button type="submit">Sign Me Up!</button>
-    </form>
-
-    <p class="popup-small">
-      Fun games. Great deals. Good times.
-    </p>
-
+      <p class="popup-small">Only the good stuff. Unsubscribe anytime.</p>
+    </div>
   </div>
 </div>
 
 <script>
   const popup = document.getElementById("gamePopup");
   const closeButton = document.getElementById("closePopup");
+  const popupSessionKey = "gigglingBeanPopupShown";
 
   if (popup && closeButton) {
-    // Show popup after 12 seconds
-    setTimeout(function () {
-      popup.style.display = "flex";
-    }, 12000);
+    let hasShownThisSession = false;
 
-    // Close when X is clicked
+    try {
+      hasShownThisSession = sessionStorage.getItem(popupSessionKey) === "true";
+    } catch (error) {
+      // If browser storage is unavailable, the popup can still work normally.
+    }
+
+    if (!hasShownThisSession) {
+      setTimeout(function () {
+        popup.style.display = "flex";
+
+        try {
+          sessionStorage.setItem(popupSessionKey, "true");
+        } catch (error) {
+          // Keep the popup functional even when browser storage is unavailable.
+        }
+      }, 10000);
+    }
+
     function closeGamePopup() {
       popup.style.display = "none";
     }
 
     closeButton.addEventListener("click", closeGamePopup);
 
-    // Close when the dark background is clicked
     popup.addEventListener("click", function (event) {
       if (event.target === popup) {
         closeGamePopup();
@@ -114,7 +116,5 @@
     });
   }
 </script>
-</body>
-
 </body>
 </html>
