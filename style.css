@@ -775,3 +775,20 @@ input:focus-visible {
   .popup-overlay, .popup-box { animation: none; }
   .popup-close, .popup-email-signup button { transition: none; }
 }
+
+.terms-button {
+  display: inline-block;
+  background-color: #6b4226;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  margin-top: 15px;
+  transition: 0.3s;
+}
+
+.terms-button:hover {
+  background-color: #422817;
+  color: white;
+}
