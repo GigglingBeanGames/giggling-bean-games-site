@@ -229,7 +229,7 @@ input:focus-visible {
   min-height: calc(100svh - var(--header-height));
   padding: 70px max(28px, calc((100% - 1180px) / 2));
   overflow: hidden;
-  background-image: linear-gradient(90deg, rgba(8, 29, 18, .94) 0%, rgba(8, 29, 18, .72) 32%, rgba(8, 29, 18, .2) 62%, rgba(8, 29, 18, .03) 100%), url("images/pests-family-hero-v9.png");
+  background-image: linear-gradient(90deg, rgba(8, 29, 18, .94) 0%, rgba(8, 29, 18, .72) 32%, rgba(8, 29, 18, .2) 62%, rgba(8, 29, 18, .03) 100%), url("images/friends-card-game-hero.png");
   background-position: center;
   background-size: cover;
   color: #fff;
@@ -498,7 +498,7 @@ input:focus-visible {
 }
 
 @media (max-width: 820px) {
-  .hero-background { min-height: 680px; padding: 70px 24px; background-image: linear-gradient(90deg, rgba(8, 29, 18, .9), rgba(8, 29, 18, .48)), url("images/pests-family-hero-v9.png"); background-position: 58% center; }
+  .hero-background { min-height: 680px; padding: 70px 24px; background-image: linear-gradient(90deg, rgba(8, 29, 18, .9), rgba(8, 29, 18, .48)), url("images/friends-card-game-hero.png"); background-position: 58% center; }
   .hero-copy { width: min(560px, 100%); }
   .hero h1 { font-size: 4.2rem; }
   .newsletter-inner { grid-template-columns: 1fr; gap: 30px; }
